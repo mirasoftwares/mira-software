@@ -44,11 +44,7 @@ document.getElementById('heroScroller').addEventListener('mouseleave', () => {
 });
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-// Contact form → Formspree
-// SETUP: Go to https://formspree.io → New Form → connect info@mirasoftware.co.za
-// Copy your form ID (looks like: xpwzabcd) and replace YOUR_FORM_ID below
-const FORMSPREE_ID = 'YOUR_FORM_ID';
-
+// Contact form → Web3Forms
 document.getElementById('contact-form').addEventListener('submit', async function (e) {
     e.preventDefault();
 
@@ -76,14 +72,25 @@ document.getElementById('contact-form').addEventListener('submit', async functio
     errorEl.style.display = 'none';
 
     try {
-        const data = new FormData(form);
-        const response = await fetch('https://formspree.io/f/' + FORMSPREE_ID, {
+        const payload = {
+            access_key: '0a6f6fa8-dd44-4f62-9b7e-4f93dc972edf',
+            subject: 'New enquiry from mirasoftware.co.za',
+            from_name: form.firstName.value + ' ' + form.lastName.value,
+            email: form.email.value,
+            company: form.company.value,
+            service: form.service.value,
+            message: form.message.value
+        };
+
+        const response = await fetch('https://api.web3forms.com/submit', {
             method: 'POST',
-            body: data,
-            headers: { 'Accept': 'application/json' }
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify(payload)
         });
 
-        if (response.ok) {
+        const result = await response.json();
+
+        if (result.success) {
             form.style.display = 'none';
             successEl.style.display = 'block';
         } else {
@@ -96,3 +103,20 @@ document.getElementById('contact-form').addEventListener('submit', async functio
         btn.style.opacity = '1';
     }
 });
+
+// ── Email injection (split to avoid proxy obfuscation) ──
+(function() {
+    const u = 'info';
+    const d = 'mirasoftware.co.za';
+    const e = u + '@' + d;
+    const h = 'mailto:' + e;
+
+    const el = document.getElementById('contact-email');
+    if (el) { el.href = h; el.textContent = e; }
+
+    const se = document.getElementById('success-email');
+    if (se) { se.textContent = e; }
+
+    const ee = document.getElementById('error-email');
+    if (ee) { ee.href = h; ee.textContent = e; }
+})();
