@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://mirasoftware.co.za/sitemap.xml
